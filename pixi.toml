@@ -1,0 +1,28 @@
+[workspace]
+name = "four-ur5e-cooperative-transport"
+version = "1.0.0"
+description = "Cooperative object transportation with four UR5e manipulators in MuJoCo."
+authors = ["Shubhankar Mondal"]
+channels = ["conda-forge"]
+platforms = ["linux-64"]
+
+[dependencies]
+python = "3.11.*"
+
+[pypi-dependencies]
+# MuJoCo and NumPy are pinned to the versions the demonstration was validated with:
+# contact dynamics are sensitive to the simulator version.
+mujoco = "==3.13.0"
+numpy = "==2.3.5"
+pillow = ">=10.1"
+imageio-ffmpeg = ">=0.5"
+pytest = ">=8"
+
+[activation.env]
+OPENBLAS_NUM_THREADS = "1"
+
+[tasks]
+demo = { cmd = "python scripts/demo.py", env = { MUJOCO_GL = "glfw" }, description = "Run the demonstration in the interactive MuJoCo viewer (headless if no display)" }
+render = { cmd = "python scripts/render.py", description = "Simulate headlessly and render the demonstration video" }
+validate = { cmd = "python scripts/validate.py", description = "Run the full validation suite" }
+test = { cmd = "pytest -q tests", description = "Run the unit tests" }
