@@ -7,9 +7,10 @@ closed loop in MuJoCo; the plate is a free body moved only by gripper contact.
 
 ## Demo
 
-[![Four UR5e arms cooperatively carrying a plate in MuJoCo (click for the full-resolution video)](media/preview.gif)](media/four_ur5e_cooperative_transport.mp4)
+![Four UR5e arms cooperatively carrying a plate in MuJoCo](media/preview.gif)
 
-Real-time preview; [full-resolution video](media/four_ur5e_cooperative_transport.mp4) (1920×1080, 22 s).
+Real-time preview. [Download the full-resolution video](media/four_ur5e_cooperative_transport.mp4)
+(MP4, 1920×1080, 22 s, 8.8 MB).
 Left: oblique view. Right: top view with the recorded path of the plate.
 
 ## System
@@ -22,7 +23,7 @@ Left: oblique view. Right: top view with the recorded path of the plate.
   1.0 kg in total, initially resting on a post.
 - **Task:** close the grippers, lift by 0.08 m, then one full circle of radius
   0.15 m in 10 s about the lift point, entered and left with a smooth 2 s spiral,
-  while the height follows a 0.04 m sinusoid (two periods per circle). The plate
+  while the height follows a ±0.04 m sinusoid (two periods per circle). The plate
   orientation is held constant.
 - **Physics:** time step 1 ms, implicit-fast integrator, elliptic friction cones.
 
@@ -33,9 +34,9 @@ The controller runs at 1 kHz on the full simulator state.
 1. **Payload level.** A PD law on the plate pose gives the desired plate wrench
    `F = m (a_d + Kp e_p + Kd e_v) + m g`, `τ = I (α_d + Kr e_R + Kω e_ω) + ω × I ω`.
 2. **Wrench allocation.** The grasp matrix `G` of the four handle points maps the
-   gripper wrenches to the plate wrench. The weighted minimum-norm solution
-   `f = W⁻¹Gᵀ(GW⁻¹Gᵀ)⁻¹ W_d` distributes the load without internal squeeze and
-   penalises gripper moments more than forces.
+   gripper wrenches `wᵢ = (fᵢ, mᵢ)` to the plate wrench. The weighted minimum-norm
+   solution `w = Q⁻¹Gᵀ(GQ⁻¹Gᵀ)⁻¹ W_d` distributes the load without internal squeeze;
+   the weight `Q` penalises gripper moments more than forces.
 3. **Arm level.** Each arm follows its desired gripper pose (the desired plate pose
    composed with its handle frame) with a Cartesian impedance, adds its allocated
    wrench as feedforward, and compensates gravity and Coriolis terms:
@@ -51,7 +52,7 @@ loads. No constraint attaches the plate to the robots.
 ## Requirements
 
 - Linux x86-64
-- [Git](https://git-scm.com/) and [Pixi](https://pixi.sh) (install instructions: https://pixi.sh)
+- [Git](https://git-scm.com/) and [Pixi](https://pixi.sh)
 - An OpenGL-capable display for the interactive viewer (any GPU with current
   drivers, including integrated graphics). No NVIDIA GPU or CUDA is required: the
   simulation itself runs on the CPU.
@@ -73,7 +74,7 @@ headless and prints a summary.
 
 ```bash
 pixi run demo --headless  # run the demonstration without the viewer and print a summary
-pixi run render           # simulate headlessly and write outputs/videos/four_ur5e_cooperative_transport.mp4
+pixi run render           # render the demonstration video to outputs/videos/
 pixi run validate         # full validation suite (1–2 minutes)
 pixi run test             # unit tests
 ```
@@ -86,12 +87,12 @@ rendered video if `pixi run render` has been run first. Results are written to
 ## Project Structure
 
 ```
-src/homtrans/     scene builder, trajectory, allocation, controller, IK, simulation loop, video renderer
-scripts/          demo.py, render.py, run_demo.py, render_video.py, validate.py, build_scene.py, diagnostics/
-models/           generated MJCF model (four_ur5e_transport.xml, rebuilt by scripts/build_scene.py)
-assets/           MuJoCo Menagerie UR5e and Robotiq 2F-85 models
-media/            demonstration video and preview
-tests/            unit tests
+src/homtrans/  scene, trajectory, allocation, controller, IK, simulation loop, renderer
+scripts/       demo, render, run_demo, render_video, validate, build_scene, diagnostics/
+models/        generated MJCF model (rebuilt by scripts/build_scene.py)
+assets/        MuJoCo Menagerie UR5e and Robotiq 2F-85 models
+media/         demonstration video and preview
+tests/         unit tests
 ```
 
 ## Reproducibility

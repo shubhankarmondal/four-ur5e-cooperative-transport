@@ -18,7 +18,7 @@ kept with any copy.
 | License text | [`assets/ur5e/LICENSE`](assets/ur5e/LICENSE) (verbatim upstream copy) |
 | Modifications | None. Every file in `assets/ur5e/` is a byte-identical copy of the upstream file at the revision above. Only the model XML, its meshes and the license are included; the upstream `README.md`, `CHANGELOG.md`, `scene.xml` and `ur5e.png` are omitted. |
 
-According to the upstream `README.md` for this model (not included), that Menagerie derived it from the
+According to the upstream `README.md` for this model (not included), Menagerie derived it from the
 ROS-Industrial `ur_e_description` URDF
 (<https://github.com/ros-industrial/universal_robot/tree/kinetic-devel/ur_e_description>).
 Menagerie converted the visual meshes from that package's DAE files and designed
@@ -36,7 +36,7 @@ the collision geometry by hand.
 | License text | [`assets/robotiq_2f85/LICENSE`](assets/robotiq_2f85/LICENSE) (verbatim upstream copy) |
 | Modifications | None. Every file in `assets/robotiq_2f85/` is a byte-identical copy of the upstream file at the revision above. Only the model XML, its meshes and the license are included; the upstream `README.md`, `CHANGELOG.md`, `scene.xml` and `2f85.png` are omitted. |
 
-According to the upstream `README.md` for this model (not included), that Menagerie derived it from the
+According to the upstream `README.md` for this model (not included), Menagerie derived it from the
 ROS-Industrial `robotiq_2f_85_gripper_visualization` URDF
 (<https://github.com/ros-industrial/robotiq/tree/kinetic-devel/robotiq_2f_85_gripper_visualization>).
 
@@ -78,4 +78,4 @@ here apply only to the installed packages.
 | pillow | 12.3.0 | MIT-CMU |
 | imageio-ffmpeg | 0.6.0 | BSD-2-Clause (the Linux wheel bundles an FFmpeg executable licensed under the GPL, version 3 or later. It is run as a separate program to encode video.) |
 | pytest | 9.1.1 | MIT |
-| python (conda-forge) | 3.11.16 | PSF-2.0 |
+| python (conda-forge) | 3.11.16 | Python-2.0 |
