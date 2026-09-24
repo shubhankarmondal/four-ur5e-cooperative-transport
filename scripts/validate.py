@@ -1203,6 +1203,8 @@ def source_files() -> list[Path]:
                              check=True).stdout
         files = [HERE / f for f in out.splitlines()]
     except (OSError, subprocess.CalledProcessError):
+        files = []
+    if not files:  # no git, or an untracked copy inside another work tree
         skip = {".git", ".pixi", "outputs", "tmp", "__pycache__"}
         files = [f for f in HERE.rglob("*") if not skip & set(f.relative_to(HERE).parts)]
     return [f for f in files

@@ -27,11 +27,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(HERE / "src"))
+os.environ.setdefault("MUJOCO_GL", "egl")  # offscreen rendering
 
 from homtrans.render import render_still, render_video  # noqa: E402
 

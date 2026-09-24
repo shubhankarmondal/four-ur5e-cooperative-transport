@@ -149,6 +149,8 @@ def _arm_with_gripper(params: SceneParams) -> mujoco.MjSpec:
         -params.gripper_force_range,
         params.gripper_force_range,
     ]
+    arm.option.cone = grip.option.cone  # same options: no attach-conflict warning
+    arm.option.impratio = grip.option.impratio
     arm.attach(grip, prefix="g_", site=arm.site("attachment_site"))
     # without the gripper prefix: ur{i}_pinch, ur{i}_fingers_actuator
     arm.site("g_pinch").name = "pinch"

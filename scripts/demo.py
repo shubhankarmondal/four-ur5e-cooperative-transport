@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import os
 import sys
+import threading
 import time
 from pathlib import Path
 
@@ -57,43 +58,44 @@ def interactive(model, trajectory, controller, exit_when_done: bool) -> int:
     mujoco.mj_forward(model, data)
     max_err = 0.0
     reported = False
-    with mujoco.viewer.launch_passive(model, data) as viewer:
-        viewer.cam.lookat[:] = (0.0, 0.0, 0.35)
-        viewer.cam.distance = 3.0
-        viewer.cam.azimuth = 135.0
-        viewer.cam.elevation = -30.0
-        wall0, sim0, next_sync = time.perf_counter(), data.time, 0.0
-        while viewer.is_running():
-            mujoco.mj_step1(model, data)
-            ctrl, _ = controller.compute(model, data, data.time)
-            data.ctrl[:] = ctrl
-            mujoco.mj_step2(model, data)
-            sample = trajectory.sample(data.time)
-            if sample.phase in CARRIED and data.time <= trajectory.duration:
-                p, _, _, _ = payload_state(model, data)
-                max_err = max(max_err, float(np.linalg.norm(sample.p - p)))
-            if data.time >= next_sync:
-                viewer.sync()
-                next_sync = data.time + 1.0 / 60.0
-                lag = (data.time - sim0) - (time.perf_counter() - wall0)
-                if lag > 0.0:
-                    time.sleep(lag)  # real-time pacing
-            if not reported and data.time >= trajectory.duration:
-                _, R, _, _ = payload_state(model, data)
-                print(f"trajectory complete at t = {data.time:.2f} s: max payload tracking "
-                      f"error {1e3 * max_err:.2f} mm, final orientation error "
-                      f"{rotation_angle(sample.R.T @ R):.4f} rad")
-                reported = True
-                if exit_when_done:
-                    break
-                print("holding the final pose; close the viewer window to exit")
-        viewer.close()
-    # Let the viewer's render thread finish before the interpreter shuts down;
-    # exiting while it tears down the GL context can crash.
-    deadline = time.perf_counter() + 2.0
-    while viewer.is_running() and time.perf_counter() < deadline:
-        time.sleep(0.05)
-    time.sleep(0.2)
+    before = set(threading.enumerate())
+    try:
+        with mujoco.viewer.launch_passive(model, data) as viewer:
+            viewer.cam.lookat[:] = (0.0, 0.0, 0.35)
+            viewer.cam.distance = 3.0
+            viewer.cam.azimuth = 135.0
+            viewer.cam.elevation = -30.0
+            wall0, sim0, next_sync = time.perf_counter(), data.time, 0.0
+            while viewer.is_running():
+                mujoco.mj_step1(model, data)
+                ctrl, _ = controller.compute(model, data, data.time)
+                data.ctrl[:] = ctrl
+                mujoco.mj_step2(model, data)
+                sample = trajectory.sample(data.time)
+                if sample.phase in CARRIED and data.time <= trajectory.duration:
+                    p, _, _, _ = payload_state(model, data)
+                    max_err = max(max_err, float(np.linalg.norm(sample.p - p)))
+                if data.time >= next_sync:
+                    viewer.sync()
+                    next_sync = data.time + 1.0 / 60.0
+                    lag = (data.time - sim0) - (time.perf_counter() - wall0)
+                    if lag > 0.0:
+                        time.sleep(lag)  # real-time pacing
+                if not reported and data.time >= trajectory.duration:
+                    _, R, _, _ = payload_state(model, data)
+                    print(f"trajectory complete at t = {data.time:.2f} s: max payload tracking "
+                          f"error {1e3 * max_err:.2f} mm, final orientation error "
+                          f"{rotation_angle(sample.R.T @ R):.4f} rad")
+                    reported = True
+                    if exit_when_done:
+                        break
+                    print("holding the final pose; close the viewer window to exit")
+            viewer.close()
+    finally:
+        # Wait for the viewer's render thread to tear down its GL context before the
+        # interpreter shuts down; exiting while it does so can crash.
+        for thread in set(threading.enumerate()) - before:
+            thread.join(timeout=5.0)
     return 0
 
 
